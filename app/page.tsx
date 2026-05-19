@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { safeFetch } from "@/lib/safe-fetch";
 import { formatCurrency } from "@/lib/utils";
 import {
   PlayCircle,
@@ -71,24 +72,61 @@ const stats = [
   { value: "24/7", label: "稼働可能" },
 ];
 
+interface FeaturedCourse {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  category: string | null;
+  price: number;
+  sale_price: number | null;
+  lesson_count: number;
+}
+
 export default async function HomePage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: featuredCourses } = await supabase
-    .from("courses")
-    .select("id,slug,title,subtitle,category,level,price,sale_price,thumbnail_url,duration_minutes,lesson_count,rating_avg,rating_count,featured")
-    .eq("published", true)
-    .order("featured", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(4);
+  let isAuthed = false;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isAuthed = !!user;
+  } catch {
+    isAuthed = false;
+  }
+  const featuredCourses = await safeFetch<FeaturedCourse[]>(
+    supabase
+      .from("courses")
+      .select(
+        "id,slug,title,subtitle,category,price,sale_price,lesson_count"
+      )
+      .eq("published", true)
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(4),
+    []
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader isAuthed={!!user} />
+      <SiteHeader isAuthed={isAuthed} />
 
-      {/* Hero */}
+      {!isSupabaseConfigured() && (
+        <div className="border-b bg-amber-50 text-amber-900">
+          <div className="container py-2 text-xs">
+            ⚠ Supabase 接続情報が未設定です (.env.local の
+            <code className="mx-1 rounded bg-amber-100 px-1">
+              NEXT_PUBLIC_SUPABASE_URL
+            </code>
+            /
+            <code className="mx-1 rounded bg-amber-100 px-1">
+              NEXT_PUBLIC_SUPABASE_ANON_KEY
+            </code>
+            )。設定するとデータが表示されます。
+          </div>
+        </div>
+      )}
+
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-sky-50 via-white to-white">
         <div className="container grid gap-10 py-16 md:grid-cols-2 md:py-24">
           <div>
@@ -102,7 +140,8 @@ export default async function HomePage() {
               ひとつの<span className="text-primary">ワークフロー</span>に。
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
-              XCloud Flow は、オンライン講座 (e-Learning) と対面/オンライン予約、決済、CRM、通知、スクール管理を統合したオールインワンSaaS。
+              XCloud Flow
+              は、オンライン講座 (e-Learning) と対面/オンライン予約、決済、CRM、通知、スクール管理を統合したオールインワンSaaS。
               スクール・サロン・研修会社・整体院・コーチング事業者まで、これ1つで運営できます。
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -118,7 +157,9 @@ export default async function HomePage() {
             <dl className="mt-10 grid max-w-md grid-cols-4 gap-4">
               {stats.map((s) => (
                 <div key={s.label}>
-                  <dt className="text-2xl font-bold tracking-tight">{s.value}</dt>
+                  <dt className="text-2xl font-bold tracking-tight">
+                    {s.value}
+                  </dt>
                   <dd className="text-xs text-muted-foreground">{s.label}</dd>
                 </div>
               ))}
@@ -157,7 +198,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured courses */}
       <section className="container py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
@@ -170,7 +210,7 @@ export default async function HomePage() {
             <Link href="/courses">すべての講座 →</Link>
           </Button>
         </div>
-        {featuredCourses && featuredCourses.length > 0 ? (
+        {featuredCourses.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featuredCourses.map((c) => (
               <Link
@@ -218,11 +258,12 @@ export default async function HomePage() {
         ) : (
           <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
             まだ講座が公開されていません。
+            {!isSupabaseConfigured() &&
+              " (Supabase 接続後に表示されます)"}
           </div>
         )}
       </section>
 
-      {/* Features */}
       <section className="border-y bg-slate-50/60">
         <div className="container py-16">
           <div className="mb-10 text-center">
@@ -249,7 +290,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="container py-16">
         <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-900 px-8 py-12 text-white shadow-xl md:px-12 md:py-16">
           <div className="grid items-center gap-6 md:grid-cols-2">

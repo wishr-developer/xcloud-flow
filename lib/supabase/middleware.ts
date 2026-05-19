@@ -6,32 +6,38 @@ export async function updateSession(request: NextRequest) {
     request: { headers: request.headers },
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: "", ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          response.cookies.set({ name, value: "", ...options });
-        },
-      },
-    }
-  );
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
 
-  await supabase.auth.getUser();
+  const supabase = createServerClient(url, anonKey, {
+    cookies: {
+      get(name: string) {
+        return request.cookies.get(name)?.value;
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        request.cookies.set({ name, value, ...options });
+        response = NextResponse.next({
+          request: { headers: request.headers },
+        });
+        response.cookies.set({ name, value, ...options });
+      },
+      remove(name: string, options: CookieOptions) {
+        request.cookies.set({ name, value: "", ...options });
+        response = NextResponse.next({
+          request: { headers: request.headers },
+        });
+        response.cookies.set({ name, value: "", ...options });
+      },
+    },
+  });
+
+  // Don't crash middleware if Supabase isn't reachable yet (placeholder env).
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Ignore — Supabase not configured or unreachable.
+  }
   return response;
 }

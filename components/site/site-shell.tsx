@@ -8,12 +8,18 @@ export async function SiteShell({
   children: React.ReactNode;
 }) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let isAuthed = false;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isAuthed = !!user;
+  } catch {
+    isAuthed = false;
+  }
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader isAuthed={!!user} />
+      <SiteHeader isAuthed={isAuthed} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>
