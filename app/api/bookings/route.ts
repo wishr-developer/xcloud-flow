@@ -91,6 +91,28 @@ export async function POST(request: Request) {
       target_id: result.booking_id ?? null,
       meta: { source: body.source ?? "web", payment_method: body.payment_method },
     });
+    if (orgId) {
+      try {
+        const { data: owner } = await supabase
+          .from("organizations")
+          .select("owner_id")
+          .eq("id", orgId)
+          .maybeSingle();
+        const ownerId = (owner as { owner_id?: string | null } | null)?.owner_id ?? null;
+        if (ownerId) {
+          await supabase.from("in_app_notifications").insert({
+            organization_id: orgId,
+            user_id: ownerId,
+            type: "booking",
+            title: `新しい予約: ${body.customer_name}`,
+            body: `${body.customer_email} · 支払い: ${body.payment_method ?? "onsite"}`,
+            link: `/admin/bookings`,
+          });
+        }
+      } catch {
+        // best effort
+      }
+    }
   }
 
   if (!result.ok) {

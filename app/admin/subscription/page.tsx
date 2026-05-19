@@ -117,6 +117,11 @@ export default async function AdminSubscriptionPage({ searchParams }: PageProps)
           <div className="text-xs text-muted-foreground">
             Stripe接続: {stripeConfigured ? "✅ 本番モード" : "未設定 (デモ動作)"}
           </div>
+          <form action="/api/stripe/portal" method="post" className="pt-2">
+            <Button type="submit" size="sm" variant="outline">
+              請求ポータルを開く
+            </Button>
+          </form>
         </CardContent>
       </Card>
 

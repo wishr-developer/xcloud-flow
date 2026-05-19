@@ -45,9 +45,11 @@ const SECTIONS = [
     items: [
       { href: "/admin/bookings", label: "予約", icon: CalendarRange },
       { href: "/admin/slots", label: "予約枠", icon: CalendarRange },
+      { href: "/admin/recurring", label: "繰り返しクラス", icon: CalendarRange },
       { href: "/admin/lessons", label: "レッスン", icon: BookOpen },
       { href: "/admin/teachers", label: "講師", icon: UserCog },
       { href: "/admin/students", label: "出席管理", icon: GraduationCap },
+      { href: "/admin/locations", label: "拠点", icon: UserCog },
     ],
   },
   {
@@ -71,6 +73,7 @@ const SECTIONS = [
     heading: "システム",
     items: [
       { href: "/admin/site-config", label: "サイト設定 (業種)", icon: Settings },
+      { href: "/admin/invitations", label: "招待", icon: UserCog },
       { href: "/admin/subscription", label: "サブスクリプション", icon: CreditCard },
       { href: "/admin/settings", label: "通知 / 決済設定", icon: Settings },
     ],

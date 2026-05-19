@@ -34,7 +34,7 @@ export default async function SuccessPage({
   const { data: booking } = await supabase
     .from("bookings")
     .select(
-      "id, customer_name, customer_email, payment_status, payment_method, total_price, slot:slot_id(date,start_time,end_time,lesson:lesson_id(title), teacher:teacher_id(name))"
+      "id, customer_name, customer_email, payment_status, payment_method, total_price, qr_token, slot:slot_id(date,start_time,end_time,lesson:lesson_id(title), teacher:teacher_id(name))"
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -96,6 +96,36 @@ export default async function SuccessPage({
               </Badge>
             }
           />
+          {(booking as { qr_token?: string | null }).qr_token && (
+            <div className="space-y-2 border-t pt-4 text-center">
+              <div className="text-xs text-muted-foreground">
+                当日はこのQRをスタッフに提示してください
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                  `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app"}/attend/${(booking as { qr_token?: string }).qr_token}`
+                )}`}
+                alt="出席QR"
+                className="mx-auto h-44 w-44 rounded-md border bg-white p-2"
+              />
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                <Button asChild variant="outline">
+                  <Link
+                    href={`/api/calendar/ics?booking=${booking.id}`}
+                    prefetch={false}
+                  >
+                    .icsを保存
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href={`/api/calendar/google?booking=${booking.id}`} prefetch={false}>
+                    Googleカレンダー
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="pt-3 text-center">
             <Button asChild>
               <Link href="/book">他の枠を見る</Link>
