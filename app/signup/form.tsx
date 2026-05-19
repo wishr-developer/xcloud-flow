@@ -32,7 +32,7 @@ export function SignupForm() {
       return;
     }
     if (data.session) {
-      router.push("/admin");
+      router.push("/onboarding");
       router.refresh();
       return;
     }

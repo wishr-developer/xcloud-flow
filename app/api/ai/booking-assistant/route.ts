@@ -10,9 +10,11 @@ interface ChatMessage {
 
 export async function POST(req: Request) {
   let messages: ChatMessage[] = [];
+  let orgSlug: string | null = null;
   try {
-    const body = (await req.json()) as { messages?: ChatMessage[] };
+    const body = (await req.json()) as { messages?: ChatMessage[]; org?: string };
     messages = Array.isArray(body.messages) ? body.messages : [];
+    orgSlug = body.org ?? null;
   } catch {
     messages = [];
   }
@@ -20,7 +22,29 @@ export async function POST(req: Request) {
     [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
   const cfg = await getSiteConfig().catch(() => null);
-  const template = getBusinessTemplate(cfg?.business_type ?? "multi");
+  type OrgContext = {
+    name: string;
+    business_type: string;
+    tagline: string | null;
+    contact_email: string | null;
+  };
+  let orgContext: OrgContext | null = null;
+  if (orgSlug) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("organizations")
+        .select("name,business_type,tagline,contact_email")
+        .eq("slug", orgSlug)
+        .maybeSingle();
+      orgContext = (data as OrgContext | null) ?? null;
+    } catch {
+      orgContext = null;
+    }
+  }
+  const businessType =
+    orgContext?.business_type ?? cfg?.business_type ?? "multi";
+  const template = getBusinessTemplate(businessType);
 
   // Fetch a small list of active lessons so we can suggest something useful.
   let suggestions: { id: string; title: string; price: number }[] = [];
@@ -64,10 +88,14 @@ export async function POST(req: Request) {
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey) {
     try {
+      const orgPart = orgContext
+        ? `組織: ${orgContext.name} (${orgContext.business_type})${orgContext.tagline ? ` / ${orgContext.tagline}` : ""}。`
+        : "";
       const system: ChatMessage = {
         role: "system",
         content:
           `あなたは「${cfg?.product_name ?? "XCloud-Flow"}」の${template.displayName}向けの予約アシスタントです。` +
+          orgPart +
           `${template.serviceLabel}の予約を、丁寧で簡潔な日本語で案内してください。` +
           `候補メニュー: ${suggestions.map((s) => s.title).join(" / ") || "（メニュー未登録）"}。` +
           `分からない場合は「お問い合わせフォーム」へ誘導してください。`,

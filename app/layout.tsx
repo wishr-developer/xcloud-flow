@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BottomNav } from "@/components/site/bottom-nav";
+import { ToastProvider, ToastBridge } from "@/components/ui/toast";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app";
@@ -33,8 +35,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
+      <body className="min-h-screen bg-background pb-16 font-sans antialiased md:pb-0">
+        <ToastProvider>
+          <ToastBridge />
+          {children}
+          <BottomNav />
+        </ToastProvider>
       </body>
     </html>
   );

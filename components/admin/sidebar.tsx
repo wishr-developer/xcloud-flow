@@ -27,7 +27,11 @@ import {
 const SECTIONS = [
   {
     heading: "ダッシュボード",
-    items: [{ href: "/admin", label: "ホーム", icon: LayoutDashboard }],
+    items: [
+      { href: "/admin", label: "ホーム", icon: LayoutDashboard },
+      { href: "/admin/analytics", label: "アナリティクス", icon: LayoutDashboard },
+      { href: "/admin/audit", label: "監査ログ", icon: LayoutDashboard },
+    ],
   },
   {
     heading: "e-ラーニング",

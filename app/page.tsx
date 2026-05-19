@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import { StickyCta } from "@/components/site/sticky-cta";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { safeFetch } from "@/lib/safe-fetch";
 import { formatCurrency } from "@/lib/utils";
@@ -433,6 +434,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <StickyCta />
       <SiteFooter />
     </div>
   );

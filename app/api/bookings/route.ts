@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createBookingTransaction } from "@/lib/booking";
+import { audit } from "@/lib/audit";
+
+const FREE_MONTHLY_LIMIT = 10;
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -16,6 +19,55 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Resolve the organization for this slot so we can check the plan
+  let orgId: string | null = null;
+  let orgPlan = "free";
+  try {
+    const { data: slot } = await supabase
+      .from("booking_slots")
+      .select("organization_id")
+      .eq("id", body.slot_id)
+      .maybeSingle();
+    orgId = (slot as { organization_id?: string | null } | null)
+      ?.organization_id ?? null;
+    if (orgId) {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", orgId)
+        .maybeSingle();
+      orgPlan = (org as { plan?: string } | null)?.plan ?? "free";
+    }
+  } catch {
+    orgId = null;
+  }
+
+  if (orgPlan === "free" && orgId) {
+    try {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .gte("created_at", monthStart.toISOString());
+      if ((count ?? 0) >= FREE_MONTHLY_LIMIT) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "Freeプランの月間予約上限 (10件) に達しました。プランをアップグレードしてください: /pricing",
+            upgrade_required: true,
+          },
+          { status: 402 }
+        );
+      }
+    } catch {
+      // best effort
+    }
+  }
+
   const result = await createBookingTransaction({
     slot_id: body.slot_id,
     customer_name: body.customer_name,
@@ -27,6 +79,19 @@ export async function POST(request: Request) {
     source: body.source ?? "web",
     user_id: user?.id ?? null,
   });
+
+  if (result.ok) {
+    await audit({
+      organization_id: orgId,
+      actor_id: user?.id ?? null,
+      actor_email: body.customer_email,
+      category: "booking",
+      action: "create",
+      target_type: "bookings",
+      target_id: result.booking_id ?? null,
+      meta: { source: body.source ?? "web", payment_method: body.payment_method },
+    });
+  }
 
   if (!result.ok) {
     return NextResponse.json(result, { status: 400 });

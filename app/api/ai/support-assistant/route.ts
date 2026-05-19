@@ -10,9 +10,11 @@ interface ChatMessage {
 
 export async function POST(req: Request) {
   let messages: ChatMessage[] = [];
+  let orgSlug: string | null = null;
   try {
-    const body = (await req.json()) as { messages?: ChatMessage[] };
+    const body = (await req.json()) as { messages?: ChatMessage[]; org?: string };
     messages = Array.isArray(body.messages) ? body.messages : [];
+    orgSlug = body.org ?? null;
   } catch {
     messages = [];
   }
@@ -20,7 +22,28 @@ export async function POST(req: Request) {
     [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
   const cfg = await getSiteConfig().catch(() => null);
-  const template = getBusinessTemplate(cfg?.business_type ?? "multi");
+  type OrgContext = {
+    name: string;
+    business_type: string;
+    contact_email: string | null;
+  };
+  let orgContext: OrgContext | null = null;
+  if (orgSlug) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("organizations")
+        .select("name,business_type,contact_email")
+        .eq("slug", orgSlug)
+        .maybeSingle();
+      orgContext = (data as OrgContext | null) ?? null;
+    } catch {
+      orgContext = null;
+    }
+  }
+  const businessType =
+    orgContext?.business_type ?? cfg?.business_type ?? "multi";
+  const template = getBusinessTemplate(businessType);
 
   // Load top FAQs so even without OpenAI we have something useful.
   let faqs: { question: string; answer: string }[] = [];
@@ -40,10 +63,14 @@ export async function POST(req: Request) {
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey) {
     try {
+      const orgPart = orgContext
+        ? `組織: ${orgContext.name} (${orgContext.business_type})${orgContext.contact_email ? ` / 連絡先 ${orgContext.contact_email}` : ""}。`
+        : "";
       const system: ChatMessage = {
         role: "system",
         content:
           `あなたは「${cfg?.product_name ?? "XCloud-Flow"}」の${template.displayName}向けカスタマーサポートです。` +
+          orgPart +
           `FAQ: ${faqs.map((f) => `Q:${f.question} A:${f.answer}`).join(" / ")}。` +
           `分からない場合は /contact のフォームに誘導してください。`,
       };

@@ -89,6 +89,12 @@ export interface Organization {
   hero_copy: string | null;
   chat_opening_message: string | null;
   sample_categories: string[] | null;
+  logo_url: string | null;
+  tagline: string | null;
+  website: string | null;
+  contact_email: string | null;
+  phone: string | null;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 }
