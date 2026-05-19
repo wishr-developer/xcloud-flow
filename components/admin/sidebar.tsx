@@ -67,6 +67,7 @@ const SECTIONS = [
     heading: "システム",
     items: [
       { href: "/admin/site-config", label: "サイト設定 (業種)", icon: Settings },
+      { href: "/admin/subscription", label: "サブスクリプション", icon: CreditCard },
       { href: "/admin/settings", label: "通知 / 決済設定", icon: Settings },
     ],
   },

@@ -11,8 +11,9 @@ const COLS = [
     ],
   },
   {
-    heading: "サポート",
+    heading: "プラン / サポート",
     links: [
+      { href: "/pricing", label: "料金プラン" },
       { href: "/announcements", label: "お知らせ" },
       { href: "/faq", label: "よくある質問" },
       { href: "/contact", label: "お問い合わせ" },

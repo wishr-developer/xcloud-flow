@@ -1,4 +1,13 @@
-export type Role = "admin" | "staff" | "customer";
+export type Role = "admin" | "staff" | "customer" | "teacher" | "student";
+
+export type PlanId = "free" | "starter" | "pro" | "enterprise";
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "demo_subscription"
+  | "incomplete";
 
 export type PaymentStatus =
   | "unpaid"
@@ -46,6 +55,9 @@ export interface SiteConfig {
   currency: string;
   locale: string;
   updated_at: string;
+  hero_copy?: string | null;
+  chat_opening_message?: string | null;
+  sample_categories?: string[] | null;
 }
 
 export interface Profile {
@@ -54,7 +66,43 @@ export interface Profile {
   display_name: string | null;
   role: Role;
   line_user_id: string | null;
+  organization_id: string | null;
   created_at: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  business_type: BusinessType;
+  plan: PlanId;
+  status: "active" | "suspended" | "closed";
+  owner_id: string | null;
+  primary_color: string;
+  timezone: string;
+  currency: string;
+  locale: string;
+  service_label: string | null;
+  instructor_label: string | null;
+  participant_label: string | null;
+  schedule_label: string | null;
+  hero_copy: string | null;
+  chat_opening_message: string | null;
+  sample_categories: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subscription {
+  id: string;
+  organization_id: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan: PlanId;
+  status: string;
+  current_period_end: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Lesson {

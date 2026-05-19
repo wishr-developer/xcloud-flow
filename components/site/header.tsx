@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/courses", label: "講座" },
   { href: "/book", label: "予約" },
-  { href: "/announcements", label: "お知らせ" },
+  { href: "/pricing", label: "プラン" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "お問い合わせ" },
 ];

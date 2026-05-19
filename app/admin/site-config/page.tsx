@@ -8,28 +8,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { getSiteConfig } from "@/lib/site-config";
 import { saveSiteConfig } from "./actions";
+import {
+  listBusinessTemplates,
+  getBusinessTemplate,
+} from "@/lib/business-templates";
 
 export const dynamic = "force-dynamic";
 
-const BUSINESS_OPTIONS: { id: string; label: string }[] = [
-  { id: "multi", label: "汎用 (複数業態)" },
-  { id: "learning", label: "学習塾 / 教育" },
-  { id: "sports", label: "スポーツスクール" },
-  { id: "cooking", label: "料理教室" },
-  { id: "music", label: "音楽教室" },
-  { id: "language", label: "語学教室" },
-  { id: "dance", label: "ダンス" },
-  { id: "yoga", label: "ヨガ" },
-  { id: "fitness", label: "フィットネス" },
-  { id: "art", label: "アート" },
-  { id: "business", label: "ビジネス研修" },
-  { id: "other", label: "その他" },
-];
-
 export default async function SiteConfigPage() {
   const cfg = await getSiteConfig();
+  const templates = listBusinessTemplates();
+  const current = getBusinessTemplate(cfg.business_type);
+
   return (
     <div className="space-y-6">
       <div>
@@ -38,6 +32,19 @@ export default async function SiteConfigPage() {
           業種テンプレートを切り替えると、AIチャットの文言や呼称が変わります。
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>現在のテンプレート</CardTitle>
+          <CardDescription>
+            <Badge variant="secondary">{current.displayName}</Badge>
+            <span className="ml-2 text-xs">
+              呼称: {current.serviceLabel} / {current.instructorLabel} /{" "}
+              {current.participantLabel} / {current.scheduleLabel}
+            </span>
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -64,12 +71,15 @@ export default async function SiteConfigPage() {
                 defaultValue={cfg.business_type}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                {BUSINESS_OPTIONS.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.displayName}
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-muted-foreground">
+                テンプレートを変更すると、空欄の呼称・コピー欄は自動でその業種のデフォルトに置き換わります。
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="service_label">サービス呼称</Label>
@@ -77,7 +87,7 @@ export default async function SiteConfigPage() {
                 id="service_label"
                 name="service_label"
                 defaultValue={cfg.service_label}
-                placeholder="例: レッスン / クラス / 講座"
+                placeholder={current.serviceLabel}
               />
             </div>
             <div className="space-y-1.5">
@@ -86,7 +96,7 @@ export default async function SiteConfigPage() {
                 id="schedule_label"
                 name="schedule_label"
                 defaultValue={cfg.schedule_label}
-                placeholder="例: 予約枠 / 開催日"
+                placeholder={current.scheduleLabel}
               />
             </div>
             <div className="space-y-1.5">
@@ -95,7 +105,7 @@ export default async function SiteConfigPage() {
                 id="instructor_label"
                 name="instructor_label"
                 defaultValue={cfg.instructor_label}
-                placeholder="例: 講師 / コーチ / トレーナー"
+                placeholder={current.instructorLabel}
               />
             </div>
             <div className="space-y-1.5">
@@ -104,7 +114,40 @@ export default async function SiteConfigPage() {
                 id="participant_label"
                 name="participant_label"
                 defaultValue={cfg.participant_label}
-                placeholder="例: 受講者 / 生徒 / 会員"
+                placeholder={current.participantLabel}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="hero_copy">ヒーローコピー</Label>
+              <Textarea
+                id="hero_copy"
+                name="hero_copy"
+                rows={3}
+                defaultValue={cfg.hero_copy ?? ""}
+                placeholder={current.heroCopy}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="chat_opening_message">
+                AIチャット 冒頭メッセージ
+              </Label>
+              <Textarea
+                id="chat_opening_message"
+                name="chat_opening_message"
+                rows={3}
+                defaultValue={cfg.chat_opening_message ?? ""}
+                placeholder={current.chatOpeningMessage}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="sample_categories">
+                カテゴリ候補 (カンマ区切り)
+              </Label>
+              <Input
+                id="sample_categories"
+                name="sample_categories"
+                defaultValue={(cfg.sample_categories ?? []).join(", ")}
+                placeholder={current.sampleCategories.join(", ")}
               />
             </div>
             <div className="space-y-1.5">

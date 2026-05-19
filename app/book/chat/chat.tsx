@@ -185,6 +185,33 @@ export function ChatBooking({
     [slots, selectedLesson, selectedRange]
   );
 
+  // Free-form AI assistant (works without OpenAI via rule-based fallback)
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  async function onAskAi(e: React.FormEvent) {
+    e.preventDefault();
+    const q = aiInput.trim();
+    if (!q || aiLoading) return;
+    setAiLoading(true);
+    pushUser(q);
+    setAiInput("");
+    try {
+      const res = await fetch("/api/ai/booking-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: q }],
+        }),
+      });
+      const data = (await res.json()) as { reply?: string };
+      pushAssistant(data.reply ?? "申し訳ありません、回答を生成できませんでした。");
+    } catch {
+      pushAssistant("通信エラーが発生しました。お問い合わせフォームよりご連絡ください。");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <Card>
       <CardContent className="p-0">
@@ -328,6 +355,20 @@ export function ChatBooking({
 
             <div ref={bottomRef} />
           </div>
+          <form
+            onSubmit={onAskAi}
+            className="flex items-center gap-2 border-t bg-white p-3"
+          >
+            <Input
+              value={aiInput}
+              onChange={(e) => setAiInput(e.target.value)}
+              placeholder="自由に質問できます (例: 今週空いてる?)"
+              disabled={aiLoading}
+            />
+            <Button type="submit" size="sm" disabled={aiLoading || !aiInput.trim()}>
+              {aiLoading ? "…" : <Send className="h-4 w-4" />}
+            </Button>
+          </form>
         </div>
       </CardContent>
     </Card>

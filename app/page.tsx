@@ -7,6 +7,8 @@ import { SiteFooter } from "@/components/site/footer";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { safeFetch } from "@/lib/safe-fetch";
 import { formatCurrency } from "@/lib/utils";
+import { getSiteConfig } from "@/lib/site-config";
+import { getBusinessTemplate } from "@/lib/business-templates";
 import {
   Calendar,
   MessageSquare,
@@ -116,6 +118,9 @@ export default async function HomePage() {
   } catch {
     isAuthed = false;
   }
+  const siteConfig = await getSiteConfig();
+  const template = getBusinessTemplate(siteConfig.business_type);
+  const heroCopy = siteConfig.hero_copy ?? template.heroCopy;
   const featuredCourses = await safeFetch<FeaturedCourse[]>(
     supabase
       .from("courses")
@@ -157,8 +162,10 @@ export default async function HomePage() {
               <span className="text-primary">AI対応</span>をひとつに。
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
-              学習塾、スポーツ、料理、音楽、語学、ダンス、ヨガ、フィットネス、アート、ビジネス研修まで。
-              あらゆるスクール業態のためのオールインワンSaaS、<span className="font-semibold text-foreground">XCloud-Flow</span>。
+              {heroCopy}{" "}
+              <span className="font-semibold text-foreground">
+                {siteConfig.product_name}
+              </span>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
