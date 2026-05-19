@@ -163,5 +163,44 @@ export async function saveOnboarding(formData: FormData): Promise<OnboardingResu
     meta: { business_type, slug, name },
   });
 
-  return { ok: true, redirect: "/admin" };
+  // Best-effort: create one starter booking_slot for tomorrow if a lesson was added.
+  if (lessonTitle) {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const isoDate = tomorrow.toISOString().slice(0, 10);
+      const { data: lesson } = await supabase
+        .from("lessons")
+        .select("id,price,duration_minutes")
+        .eq("organization_id", orgId)
+        .eq("title", lessonTitle)
+        .maybeSingle();
+      const l = lesson as { id?: string; price?: number; duration_minutes?: number } | null;
+      if (l?.id) {
+        await supabase.from("booking_slots").insert({
+          organization_id: orgId,
+          lesson_id: l.id,
+          date: isoDate,
+          start_time: "10:00:00",
+          end_time:
+            l.duration_minutes && l.duration_minutes <= 120
+              ? new Date(
+                  Date.UTC(2000, 0, 1, 10, 0) +
+                    (l.duration_minutes ?? 60) * 60 * 1000
+                )
+                  .toISOString()
+                  .slice(11, 19)
+              : "11:00:00",
+          capacity: 8,
+          booked_count: 0,
+          price: l.price ?? 0,
+          status: "open",
+        });
+      }
+    } catch {
+      // ignore — schema variance
+    }
+  }
+
+  return { ok: true, redirect: "/onboarding/done" };
 }

@@ -76,6 +76,7 @@ const SECTIONS = [
       { href: "/admin/invitations", label: "招待", icon: UserCog },
       { href: "/admin/subscription", label: "サブスクリプション", icon: CreditCard },
       { href: "/admin/settings", label: "通知 / 決済設定", icon: Settings },
+      { href: "/admin/system-status", label: "システム状態", icon: Settings },
     ],
   },
 ];

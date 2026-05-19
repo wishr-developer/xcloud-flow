@@ -83,7 +83,13 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
           temperature: 0.3,
-          messages: [system, ...messages],
+          max_tokens: 400,
+          messages: [
+            system,
+            ...messages
+              .filter((m) => m.role === "user" || m.role === "assistant")
+              .slice(-8),
+          ],
         }),
       });
       if (res.ok) {
