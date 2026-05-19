@@ -23,6 +23,8 @@ export async function POST(request: Request) {
     customer_phone: body.customer_phone ?? null,
     payment_method: body.payment_method ?? "onsite",
     memo: body.memo ?? null,
+    participant_note: body.participant_note ?? null,
+    source: body.source ?? "web",
     user_id: user?.id ?? null,
   });
 

@@ -35,9 +35,15 @@ const RANGES: { id: string; label: string; days: number }[] = [
 export function ChatBooking({
   lessons,
   slots,
+  greeting,
+  serviceLabel = "レッスン",
+  scheduleLabel = "予約枠",
 }: {
   lessons: ChatLesson[];
   slots: ChatSlot[];
+  greeting?: string;
+  serviceLabel?: string;
+  scheduleLabel?: string;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("greeting");
@@ -45,7 +51,12 @@ export function ChatBooking({
     {
       role: "assistant",
       content:
-        "こんにちは！BookSpaceアシスタントです。ご希望のレッスンと日時をうかがいながら、空き枠をご提案します。",
+        greeting ??
+        "こんにちは！XCloud-Flow アシスタントです。ご希望の" +
+          serviceLabel +
+          "と日時をうかがいながら、空き" +
+          scheduleLabel +
+          "をご提案します。",
     },
   ]);
   const [selectedLesson, setSelectedLesson] = useState<ChatLesson | null>(null);
@@ -66,12 +77,12 @@ export function ChatBooking({
   useEffect(() => {
     if (step === "greeting") {
       const t = setTimeout(() => {
-        pushAssistant("まず、ご希望のメニューをお選びください。");
+        pushAssistant(`まず、ご希望の${serviceLabel}をお選びください。`);
         setStep("pickLesson");
       }, 400);
       return () => clearTimeout(t);
     }
-  }, [step]);
+  }, [step, serviceLabel]);
 
   function pushAssistant(content: React.ReactNode) {
     setMessages((m) => [...m, { role: "assistant", content }]);
@@ -98,13 +109,13 @@ export function ChatBooking({
       const filtered = filterSlots(slots, selectedLesson?.id, days);
       if (filtered.length === 0) {
         pushAssistant(
-          "申し訳ありません、その期間に空き枠が見つかりませんでした。他の期間を選んでください。"
+          `申し訳ありません、その期間に空き${scheduleLabel}が見つかりませんでした。他の期間を選んでください。`
         );
         setStep("pickRange");
         return;
       }
       pushAssistant(
-        `${filtered.length}件の空き枠が見つかりました。ご希望の枠を選んでください。`
+        `${filtered.length}件の空き${scheduleLabel}が見つかりました。ご希望のものをお選びください。`
       );
       setStep("pickSlot");
     }, 300);
@@ -140,6 +151,7 @@ export function ChatBooking({
         customer_email: email,
         customer_phone: phone || null,
         payment_method: method,
+        source: "chat",
       }),
     });
     const data = (await res.json()) as {

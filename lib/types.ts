@@ -16,6 +16,37 @@ export type BookingStatus = "confirmed" | "canceled";
 export type SlotStatus = "open" | "closed" | "full";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
 export type EnrollmentStatus = "active" | "completed" | "canceled";
+export type LocationType = "offline" | "online" | "hybrid";
+export type BookingSource = "web" | "chat" | "admin" | "api";
+
+export type BusinessType =
+  | "multi"
+  | "learning"
+  | "sports"
+  | "cooking"
+  | "music"
+  | "language"
+  | "dance"
+  | "yoga"
+  | "fitness"
+  | "art"
+  | "business"
+  | "other";
+
+export interface SiteConfig {
+  id: number;
+  product_name: string;
+  business_type: BusinessType;
+  service_label: string;
+  instructor_label: string;
+  participant_label: string;
+  schedule_label: string;
+  primary_color: string;
+  timezone: string;
+  currency: string;
+  locale: string;
+  updated_at: string;
+}
 
 export interface Profile {
   id: string;
@@ -34,6 +65,11 @@ export interface Lesson {
   price: number;
   capacity: number;
   active: boolean;
+  category: string | null;
+  difficulty: string | null;
+  location_type: LocationType;
+  target_audience: string | null;
+  required_items: string | null;
   created_at: string;
 }
 
@@ -57,6 +93,10 @@ export interface BookingSlot {
   booked_count: number;
   price: number;
   status: SlotStatus;
+  location: string | null;
+  online_url: string | null;
+  waitlist_enabled: boolean;
+  waitlist_count: number;
   created_at: string;
 }
 
@@ -73,6 +113,10 @@ export interface Booking {
   status: BookingStatus;
   total_price: number;
   memo: string | null;
+  participant_note: string | null;
+  admin_note: string | null;
+  source: BookingSource;
+  reminder_sent_at: string | null;
   created_at: string;
 }
 
@@ -98,7 +142,13 @@ export interface Course {
   description: string | null;
   thumbnail_url: string | null;
   category: string | null;
+  industry: string | null;
   level: CourseLevel;
+  difficulty: string | null;
+  location_type: LocationType;
+  target_audience: string | null;
+  required_items: string | null;
+  active: boolean;
   price: number;
   sale_price: number | null;
   duration_minutes: number;

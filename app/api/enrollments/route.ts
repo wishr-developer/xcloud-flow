@@ -63,7 +63,7 @@ async function createStripeCheckout(args: {
     form.append("line_items[0][price_data][currency]", "jpy");
     form.append(
       "line_items[0][price_data][product_data][name]",
-      `XCloud Flow Course ${args.enrollmentId}`
+      `XCloud-Flow Course ${args.enrollmentId}`
     );
     form.append("line_items[0][price_data][unit_amount]", String(args.amount));
     form.append("line_items[0][quantity]", "1");

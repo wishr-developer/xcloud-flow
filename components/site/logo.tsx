@@ -7,7 +7,8 @@ export function Logo({
   className?: string;
   size?: "sm" | "md" | "lg";
 }) {
-  const dot = size === "sm" ? "h-7 w-7" : size === "lg" ? "h-10 w-10" : "h-8 w-8";
+  const dot =
+    size === "sm" ? "h-7 w-7" : size === "lg" ? "h-10 w-10" : "h-8 w-8";
   const text =
     size === "sm" ? "text-base" : size === "lg" ? "text-xl" : "text-lg";
   return (
@@ -33,7 +34,7 @@ export function Logo({
         </svg>
       </span>
       <span className={cn("font-semibold tracking-tight", text)}>
-        XCloud Flow
+        XCloud-Flow
       </span>
     </span>
   );

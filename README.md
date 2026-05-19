@@ -1,141 +1,158 @@
-# XCloud Flow
+# XCloud-Flow
 
-オンライン学習 × 予約 × 決済 × CRM を統合した次世代ラーニング/業務プラットフォーム。
-Next.js (App Router) + TypeScript + Tailwind + Supabase (Auth/DB/RLS) で構築されています。
+予約、受講管理、決済、通知、AI対応をひとつに。
+学習塾・スポーツ・料理・音楽・語学・ダンス・ヨガ・フィットネス・アート・ビジネス研修まで、
+**あらゆるスクール業態**に対応するオールインワン SaaS。
+
+Next.js (App Router) + TypeScript + Tailwind + Supabase (Auth/DB/RLS) で構築。
 
 ## 主な機能
 
 ### 顧客向け
-- **オンライン講座 (e-Learning)** — カテゴリ・レベル・キーワード検索、講座詳細、無期限視聴
-- **動画レッスン受講UI** — カリキュラム表示、進捗自動計算、修了時の証明書発行
-- **予約 (通常 / AIチャット)** — 残席リアルタイム反映、ダブルブッキング防止
-- **マイページ** — 受講中講座、予約履歴、修了証
-- **お知らせ / FAQ / お問い合わせ**
-- **ログイン / サインアップ (Supabase Auth)**
-- レスポンシブ対応 (モバイル/タブレット/PC)、ハンバーガーメニュー
+- 予約 (対面 / オンライン / ハイブリッド) + 残席リアルタイム反映
+- AIチャット予約 (業種に応じた会話文に自動切り替え)
+- オンデマンド受講 (動画+テキスト、進捗管理、修了証)
+- マイページ (受講・予約・修了証)
+- お知らせ / FAQ / お問い合わせ
+- ログイン / サインアップ (Supabase Auth)
 
 ### 管理者向け
-- **ダッシュボード** — 今日/今月の予約数、累計受講者、月次売上 (予約+講座)、未対応問合せ
-- **講座管理** — 講座 CRUD、セクション/レッスン編集、注目フラグ
-- **受講者管理** — 各講座の進捗・支払い状況
-- **予約 / 予約枠 / レッスン / 講師 CRUD**
-- **CRM (顧客)** — 累計予約・売上・タグ・メモ・履歴
-- **スクール管理** — 本日の出席、欠席記録
-- **決済・通知ログ**
-- **マーケティング** — お知らせ、FAQ、クーポン、お問い合わせ受信箱
-- **設定** — LINE Webhook、Stripe price ID、管理者昇格
+- ダッシュボード (今日/今月予約、累計受講者、月次売上、未対応問合せ)
+- 講座 / レッスン / 予約枠 / 講師 CRUD
+- 受講者 / 予約 / 顧客 CRM
+- スクール出席管理
+- お知らせ / FAQ / クーポン / 問い合わせ管理
+- **サイト設定 (業種テンプレート / 呼称 / プライマリーカラー)**
+- 決済・通知ログ・管理者昇格
+
+### 業種テンプレート
+`multi / learning / sports / cooking / music / language / dance / yoga / fitness / art / business / other`
+管理画面の「サイト設定」で切替可能。AIチャットの文言や呼称が自動で変わります。
 
 ### 決済 / 通知
-- **Stripe Checkout** (任意。`STRIPE_SECRET_KEY` 未設定時は自動でデモ決済)
-- **LINE Webhook 通知** (任意。未設定時は `skipped` としてログ)
+- **Stripe Checkout** (未設定なら自動でデモ決済)
+- **LINE Webhook 通知** (未設定なら "skipped" ログ)
 - **クーポン** (パーセント / 固定額、利用上限・有効期限対応)
+
+---
 
 ## クイックスタート (ローカル)
 
 ```bash
-# 依存をインストール
+# 1. 依存をインストール
 npm install
 
-# .env.local を作成し Supabase 接続情報を記入
+# 2. .env.local を作成 (Supabase URL は記入済み)
 cp .env.local.example .env.local
+# → NEXT_PUBLIC_SUPABASE_ANON_KEY だけ Supabase Dashboard から貼り付け
 
-# Supabase に下記2ファイルを順番に適用
-#   1. supabase/migrations/0001_init.sql
-#   2. supabase/migrations/0002_xcloud_flow.sql
+# 3. Supabase SQL Editor に以下を順番に流す
+#   supabase/migrations/0001_init.sql
+#   supabase/migrations/0002_xcloud_flow.sql
+#   supabase/migrations/0003_multi_industry.sql
+# (一括で良ければ supabase/_combined.sql)
 
-# 開発サーバー起動
+# 4. 起動
 npm run dev
 # → http://localhost:3000
 ```
 
-サインアップ後に Supabase の SQL から自身を管理者に昇格:
+### 管理者昇格
 
+サインアップ後に Supabase SQL Editor で:
 ```sql
 update public.profiles set role = 'admin' where email = 'your@email.com';
 ```
 
-または `/admin/settings` の「管理者権限を付与」フォームから昇格できます。
+---
 
-## GitHub と Vercel への接続
+## Vercel デプロイ
 
-### 1. GitHub リポジトリを作成して push
+GitHub: https://github.com/wishr-developer/xcloud-flow
 
-```bash
-git init
-git add -A
-git commit -m "feat: initial XCloud Flow MVP"
-git branch -M main
+### 1. Vercel に Import
 
-# GitHub で空のリポジトリを作成して、その URL を origin に設定:
-git remote add origin git@github.com:<あなたのアカウント>/xcloud-flow.git
-git push -u origin main
-```
+1. https://vercel.com/new → Import Git Repository → `wishr-developer/xcloud-flow`
+2. **Project Name**: `XCloud-Flow`
+3. Framework: Next.js (自動検出)
 
-> GitHub CLI が入っていれば `gh repo create xcloud-flow --public --source=. --push` の1コマンドで作成できます。
+### 2. Environment Variables を設定
 
-### 2. Vercel にプロジェクトを接続
+| Key | Value | 必須 |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://jzktegqjepzvusijhrhzd.supabase.co` | ✅ |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (Supabase の anon key) | ✅ |
+| `NEXT_PUBLIC_SITE_URL` | `https://xcloud-flow.vercel.app` (デプロイ後の URL) | ✅ |
+| `STRIPE_SECRET_KEY` | (任意) | — |
+| `STRIPE_WEBHOOK_SECRET` | (任意) | — |
+| `LINE_WEBHOOK_URL` | (任意) | — |
+| `OPENAI_API_KEY` | (任意) | — |
+| `SUPABASE_SERVICE_ROLE_KEY` | (任意・将来Stripe webhook用) | — |
 
-1. https://vercel.com/new で 「Import Git Repository」 を選び、上記リポジトリを選択
-2. Framework は **Next.js** (自動検出されます)
-3. **Environment Variables** を入力:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `STRIPE_SECRET_KEY` (任意)
-   - `LINE_WEBHOOK_URL` (任意)
-4. **Deploy** をクリック
+### 3. Deploy
 
-以降は `git push` ごとにプレビュー URL が発行され、`main` への push が本番にデプロイされます。
+`git push` ごとに自動でプレビュー URL、`main` push で本番デプロイされます。
 
-### Vercel CLI で確認したい場合
+### Vercel CLI 経由
 
 ```bash
 npm i -g vercel
-vercel link        # 既存プロジェクトを紐付け
-vercel             # プレビューデプロイ
-vercel --prod      # 本番デプロイ
+vercel link
+vercel             # プレビュー
+vercel --prod      # 本番
 ```
+
+---
 
 ## ディレクトリ構成
 
 ```
 app/
-  page.tsx                       # ランディング
-  courses/...                    # 講座カタログ + 受講UI
-  book/...                       # 予約 (通常 + AIチャット)
-  my/...                         # マイページ
-  announcements/, faq/, contact/ # マーケティング
-  api/
-    bookings/, enrollments/, lesson-progress/, contact/
+  page.tsx                      # マルチ業種ランディング (8業種カード)
+  courses/...                   # 講座カタログ + 受講UI
+  book/...                      # 予約 (通常 + AIチャット, 業種別文言)
+  my/...                        # マイページ
+  announcements/, faq/, contact/
+  api/bookings/, enrollments/, lesson-progress/, contact/
   admin/
+    site-config/                # 業種テンプレート切替
     courses/, enrollments/, bookings/, slots/, lessons/, teachers/
     students/, customers/, payments/, notifications/
     announcements/, faqs/, coupons/, contacts/, settings/
 components/
-  site/                          # 公開サイトの header / footer / logo
-  admin/                         # 管理画面 sidebar / topbar / kpi
-  courses/                       # course-card
-  ui/                            # shadcn/ui コンポーネント
+  site/                         # 公開サイトの header / footer / logo
+  admin/                        # 管理画面 sidebar / topbar / kpi
+  courses/                      # course-card
+  ui/                           # shadcn/ui コンポーネント
 lib/
-  supabase/                      # client / server / middleware
-  booking.ts, enrollment.ts      # 予約 / 受講のドメインロジック
+  supabase/                     # client / server / middleware (placeholder fallback)
+  booking.ts, enrollment.ts     # 予約 / 受講のドメインロジック
+  site-config.ts                # 業種テンプレート + チャットgreeting
+  safe-fetch.ts                 # データ取得失敗のフォールバック
   types.ts, utils.ts
 supabase/migrations/
-  0001_init.sql                  # 予約・CRM・通知・決済テーブル
-  0002_xcloud_flow.sql           # 講座・受講・マーケティング
+  0001_init.sql                 # 予約・CRM・通知・決済
+  0002_xcloud_flow.sql          # e-Learning + マーケティング
+  0003_multi_industry.sql       # site_config + 業種汎用フィールド
+supabase/_combined.sql          # 上記3つを結合 (1ファイルで一括実行可)
+supabase/verify.sql             # 反映確認用
 ```
+
+---
 
 ## 本番化のステップ
 
-- [ ] Stripe Webhook (`/api/stripe/webhook`) を実装し `checkout.session.completed` で `payment_status=paid` 更新
-- [ ] Supabase Email confirm を ON にして本番テンプレを整える
-- [ ] OpenAI API を `/api/chat` に追加し、AIチャットを本物のLLMに置換
-- [ ] LINE Messaging API の正規認証 + 個別 ユーザー ID 配信
-- [ ] 動画ホスティング (Mux / Cloudflare Stream) との連携
-- [ ] 修了証 PDF 生成 (PDF-Lib / Puppeteer)
-- [ ] 法人 (B2B) 向け: 一括受講登録、団体請求
-- [ ] 監視: Sentry / Logflare、レート制限 / BotID
-- [ ] テスト: Vitest + Playwright
+- [ ] Stripe Webhook 実装 (`/api/stripe/webhook` で payment_status を paid に)
+- [ ] LINE Messaging API 正規認証
+- [ ] OpenAI で `/api/chat` を本物の LLM に置換
+- [ ] 動画ホスティング連携 (Mux / Cloudflare Stream)
+- [ ] 修了証 PDF 出力
+- [ ] 法人 (B2B) 一括受講登録
+- [ ] 監視 (Sentry / Logflare)
+- [ ] テスト (Vitest + Playwright)
+
+---
 
 ## ライセンス
 
-MIT (社内利用前提のため、配布する場合は適宜変更してください)
+MIT

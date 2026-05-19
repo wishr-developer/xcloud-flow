@@ -65,7 +65,10 @@ const SECTIONS = [
   },
   {
     heading: "システム",
-    items: [{ href: "/admin/settings", label: "設定", icon: Settings }],
+    items: [
+      { href: "/admin/site-config", label: "サイト設定 (業種)", icon: Settings },
+      { href: "/admin/settings", label: "通知 / 決済設定", icon: Settings },
+    ],
   },
 ];
 
@@ -127,7 +130,7 @@ export function AdminSidebar() {
         </div>
         {navContent}
         <div className="border-t p-3 text-xs text-muted-foreground">
-          XCloud Flow · 管理画面
+          XCloud-Flow · 管理画面
         </div>
       </aside>
 

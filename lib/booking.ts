@@ -8,6 +8,8 @@ export interface BookingInput {
   customer_phone?: string | null;
   payment_method: "onsite" | "stripe" | "demo";
   memo?: string | null;
+  participant_note?: string | null;
+  source?: "web" | "chat" | "admin" | "api";
   user_id?: string | null;
 }
 
@@ -75,6 +77,8 @@ async function runBooking(
       status: "confirmed",
       total_price: slot.price ?? 0,
       memo: input.memo ?? null,
+      participant_note: input.participant_note ?? null,
+      source: input.source ?? "web",
     })
     .select("id, total_price")
     .single();

@@ -1,19 +1,28 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app";
+
 export const metadata: Metadata = {
   title: {
-    default: "XCloud Flow — オンライン学習 × 予約 × 決済の統合プラットフォーム",
-    template: "%s | XCloud Flow",
+    default: "XCloud-Flow — 予約・受講管理・決済・通知・AI をひとつに",
+    template: "%s | XCloud-Flow",
   },
   description:
-    "XCloud Flow は、e-ラーニング講座・対面/オンライン予約・LINE通知・決済・CRM・スクール管理をひとつにまとめたSaaSです。",
-  metadataBase: new URL("https://xcloud-flow.vercel.app"),
+    "XCloud-Flow は、スクール・教室・スタジオ・ジム・研修事業のための予約 × 受講管理 × 決済 × 通知 × AI を統合したオールインワン SaaS。学習、スポーツ、料理、音楽、語学、ダンス、ヨガ、フィットネス、アート、ビジネス研修まで、あらゆる業態に対応します。",
+  metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: "XCloud Flow",
+    title: "XCloud-Flow",
     description:
-      "オンライン講座と予約・決済を統合した次世代ラーニング/予約プラットフォーム",
+      "予約、受講管理、決済、通知、AI対応をひとつに。あらゆるスクール業態のための統合 SaaS。",
     type: "website",
+    siteName: "XCloud-Flow",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "XCloud-Flow",
+    description: "予約、受講管理、決済、通知、AI対応をひとつに。",
   },
 };
 
