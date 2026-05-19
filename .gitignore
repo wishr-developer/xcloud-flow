@@ -1,0 +1,19 @@
+node_modules
+.next
+.env
+.env.local
+.env*.local
+.vercel
+.DS_Store
+*.log
+
+# Next.js
+.next/
+out/
+
+# Vercel
+.vercel
+
+# IDE
+.vscode/
+.idea/
