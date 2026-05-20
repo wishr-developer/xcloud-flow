@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/site/site-shell";
+import { getOperatorInfo } from "@/lib/operator-info";
 
 export const dynamic = "force-static";
 
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function CommercialDisclosurePage() {
+  const op = getOperatorInfo();
+  const fallback = "請求があった場合に遅滞なく開示します。";
+
   return (
     <SiteShell skipAuth>
       <article className="container max-w-3xl py-12 text-sm leading-relaxed text-slate-700">
@@ -26,23 +30,33 @@ export default function CommercialDisclosurePage() {
         </p>
 
         <dl className="mt-8 grid grid-cols-1 gap-y-3 text-sm sm:grid-cols-[180px_1fr]">
-          <Row label="販売事業者">
-            運営者情報に記載の事業者
-            <span className="ml-2 text-xs text-muted-foreground">
-              (詳細は
-              <Link href="/contact" className="text-primary underline">
-                お問い合わせフォーム
-              </Link>
-              よりお問い合わせください)
-            </span>
-          </Row>
-          <Row label="運営責任者">運営者情報に記載のとおり</Row>
-          <Row label="所在地">請求があった場合に遅滞なく開示します。</Row>
+          <Row label="販売事業者">{op.businessName ?? fallback}</Row>
+          <Row label="運営責任者">{op.representative ?? fallback}</Row>
+          <Row label="所在地">{op.address ?? fallback}</Row>
           <Row label="連絡先">
-            <Link href="/contact" className="text-primary underline">
-              /contact
-            </Link>
-            （お問い合わせフォーム）。電話番号は請求があった場合に遅滞なく開示します。
+            {op.supportEmail ? (
+              <a className="text-primary underline" href={`mailto:${op.supportEmail}`}>
+                {op.supportEmail}
+              </a>
+            ) : (
+              <Link href="/contact" className="text-primary underline">
+                /contact (お問い合わせフォーム)
+              </Link>
+            )}
+            {op.phone && (
+              <>
+                <br />
+                電話: {op.phone}
+              </>
+            )}
+            {!op.phone && (
+              <>
+                <br />
+                <span className="text-xs text-muted-foreground">
+                  電話番号は請求があった場合に遅滞なく開示します。
+                </span>
+              </>
+            )}
           </Row>
           <Row label="販売価格">
             各プランの料金は

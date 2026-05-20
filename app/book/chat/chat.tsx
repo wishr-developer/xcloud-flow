@@ -157,6 +157,7 @@ export function ChatBooking({
     const data = (await res.json()) as {
       ok: boolean;
       booking_id?: string;
+      qr_token?: string;
       redirect_url?: string;
       error?: string;
     };
@@ -172,8 +173,11 @@ export function ChatBooking({
     }
     pushAssistant("予約が完了しました！詳細ページへ移動します。");
     setStep("done");
+    const successUrl = data.qr_token
+      ? `/book/success?booking=${data.booking_id}&t=${encodeURIComponent(data.qr_token)}`
+      : `/book/success?booking=${data.booking_id}`;
     setTimeout(() => {
-      router.push(`/book/success?booking=${data.booking_id}`);
+      router.push(successUrl);
     }, 800);
   }
 

@@ -45,6 +45,7 @@ export function BookingForm({
     const data = (await res.json()) as {
       ok: boolean;
       booking_id?: string;
+      qr_token?: string;
       redirect_url?: string;
       error?: string;
     };
@@ -57,7 +58,10 @@ export function BookingForm({
       window.location.href = data.redirect_url;
       return;
     }
-    router.push(`/book/success?booking=${data.booking_id}`);
+    const successUrl = data.qr_token
+      ? `/book/success?booking=${data.booking_id}&t=${encodeURIComponent(data.qr_token)}`
+      : `/book/success?booking=${data.booking_id}`;
+    router.push(successUrl);
   }
 
   return (

@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { audit } from "@/lib/audit";
+import { sendEmail, escapeHtml } from "@/lib/email";
 
 function newToken(): string {
   return randomBytes(24).toString("base64url");
@@ -62,17 +63,39 @@ export async function createInvitation(formData: FormData) {
     meta: { email, role },
   });
 
-  // Best-effort email send (only logs to notification_logs since we don't ship a mailer).
+  // Resolve organization name for the email body.
+  let orgName = "スクール";
   try {
-    await supabase.from("notification_logs").insert({
-      organization_id: orgId,
-      type: "email",
-      status: "skipped",
-      message: `招待メール (未設定) → ${email}: ${role}`,
-    });
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", orgId)
+      .maybeSingle();
+    orgName = (org as { name?: string } | null)?.name ?? orgName;
   } catch {
     // ignore
   }
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app";
+  const inviteUrl = `${siteUrl}/invite/${token}`;
+
+  await sendEmail({
+    to: email,
+    subject: `【XCloud-Flow】${orgName} への招待`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+        <h2>${escapeHtml(orgName)} への招待</h2>
+        <p>${escapeHtml(user.email ?? "")} さんが、あなたを ${escapeHtml(orgName)} の <strong>${escapeHtml(role)}</strong> として招待しました。</p>
+        <p>以下のリンクから 14 日以内にご参加ください。</p>
+        <p><a href="${inviteUrl}" style="display:inline-block; background:#4F46E5; color:#fff; padding:10px 16px; border-radius:6px; text-decoration:none;">招待を受ける</a></p>
+        <p style="font-size:12px; color:#64748b;">リンクが開けない場合は次の URL をブラウザに貼り付けてください: ${inviteUrl}</p>
+        <p style="font-size:12px; color:#64748b; margin-top:24px;">XCloud-Flow から自動送信されています。心当たりがない場合はこのメールを破棄してください。</p>
+      </div>
+    `,
+    category: "invitation",
+    organizationId: orgId,
+  });
 
   revalidatePath("/admin/invitations");
 }

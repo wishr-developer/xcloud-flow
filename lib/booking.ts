@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { sendEmail, escapeHtml } from "@/lib/email";
 
 export interface BookingInput {
   slot_id: string;
@@ -19,6 +20,8 @@ export interface BookingResult {
   total_price?: number;
   payment_status?: "unpaid" | "pending" | "paid" | "demo_paid";
   redirect_url?: string;
+  /** Returned so the public success page can render the booking under tight RLS. */
+  qr_token?: string;
   error?: string;
 }
 
@@ -80,7 +83,7 @@ async function runBooking(
       participant_note: input.participant_note ?? null,
       source: input.source ?? "web",
     })
-    .select("id, total_price")
+    .select("id, total_price, qr_token, organization_id")
     .single();
 
   if (bookErr || !booking) {
@@ -137,21 +140,88 @@ async function runBooking(
     status: payment_status,
   });
 
+  const lessonTitle = (slot.lesson as { title?: string } | null)?.title ?? "レッスン";
+  const bookingRow = booking as {
+    id: string;
+    total_price: number | null;
+    qr_token: string | null;
+    organization_id: string | null;
+  };
+
   // Notification log + LINE webhook
-  await sendLineNotification(supabase, booking.id, {
+  await sendLineNotification(supabase, bookingRow.id, {
     customer_name: input.customer_name,
-    lesson: (slot.lesson as { title?: string } | null)?.title ?? "レッスン",
+    lesson: lessonTitle,
     date: slot.date,
     start_time: slot.start_time,
-    total_price: booking.total_price ?? 0,
+    total_price: bookingRow.total_price ?? 0,
+  });
+
+  // Customer email confirmation (sent only when RESEND_API_KEY is set).
+  await sendBookingConfirmationEmail({
+    customer_name: input.customer_name,
+    customer_email: input.customer_email,
+    lesson: lessonTitle,
+    date: slot.date,
+    start_time: slot.start_time,
+    end_time: slot.end_time,
+    total_price: bookingRow.total_price ?? 0,
+    booking_id: bookingRow.id,
+    qr_token: bookingRow.qr_token,
+    organization_id: bookingRow.organization_id,
   });
 
   return {
     ok: true,
-    booking_id: booking.id,
-    total_price: booking.total_price ?? 0,
+    booking_id: bookingRow.id,
+    total_price: bookingRow.total_price ?? 0,
     payment_status,
+    qr_token: bookingRow.qr_token ?? undefined,
   };
+}
+
+async function sendBookingConfirmationEmail(data: {
+  customer_name: string;
+  customer_email: string;
+  lesson: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  total_price: number;
+  booking_id: string;
+  qr_token: string | null;
+  organization_id: string | null;
+}): Promise<void> {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app";
+  const successUrl = data.qr_token
+    ? `${siteUrl}/book/success?booking=${data.booking_id}&t=${data.qr_token}`
+    : `${siteUrl}/book/success?booking=${data.booking_id}`;
+  const subject = `【予約確定】${data.lesson} (${data.date})`;
+  const safe = (s: string) => escapeHtml(s);
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h2 style="color:#0f172a;">ご予約ありがとうございます</h2>
+      <p>${safe(data.customer_name)} 様</p>
+      <p>以下の内容でご予約をお受けしました。</p>
+      <table style="width:100%; border-collapse: collapse; margin: 16px 0;">
+        <tbody>
+          <tr><td style="padding:6px 0; color:#64748b;">メニュー</td><td style="padding:6px 0;">${safe(data.lesson)}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;">日時</td><td style="padding:6px 0;">${safe(data.date)} ${safe(data.start_time.slice(0,5))} - ${safe(data.end_time.slice(0,5))}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;">金額</td><td style="padding:6px 0;">¥${data.total_price.toLocaleString()}</td></tr>
+        </tbody>
+      </table>
+      <p><a href="${successUrl}" style="display:inline-block; background:#4F46E5; color:#fff; padding:10px 16px; border-radius:6px; text-decoration:none;">予約詳細を開く</a></p>
+      <p style="font-size:12px; color:#64748b; margin-top:24px;">このメールは XCloud-Flow から自動送信されています。ご返信の必要はありません。</p>
+    </div>
+  `;
+  await sendEmail({
+    to: data.customer_email,
+    subject,
+    html,
+    category: "booking",
+    organizationId: data.organization_id,
+  });
 }
 
 async function sendLineNotification(

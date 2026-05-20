@@ -2,13 +2,28 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteConfig } from "@/lib/site-config";
 import { getBusinessTemplate } from "@/lib/business-templates";
+import { rateLimit } from "@/lib/rate-limit";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "anon";
+  const allow = rateLimit({ key: `ai-support:${ip}`, limit: 30, windowMs: 60_000 });
+  if (!allow.ok) {
+    return NextResponse.json(
+      { ok: false, error: "rate_limited" },
+      { status: 429 }
+    );
+  }
+
   let messages: ChatMessage[] = [];
   let orgSlug: string | null = null;
   try {

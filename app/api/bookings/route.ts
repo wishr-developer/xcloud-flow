@@ -2,10 +2,29 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createBookingTransaction } from "@/lib/booking";
 import { audit } from "@/lib/audit";
+import { rateLimit } from "@/lib/rate-limit";
+
+export const runtime = "nodejs";
 
 const FREE_MONTHLY_LIMIT = 10;
 
 export async function POST(request: Request) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "anon";
+  const allow = rateLimit({ key: `bookings:${ip}`, limit: 20, windowMs: 60_000 });
+  if (!allow.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "短時間に多くの予約リクエストを検出しました。しばらく経ってから再度お試しください。",
+      },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   if (!body || !body.slot_id || !body.customer_name || !body.customer_email) {
     return NextResponse.json(

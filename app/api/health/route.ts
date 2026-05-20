@@ -6,10 +6,17 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const env = {
     supabase: isSupabaseConfigured(),
+    supabase_service_role: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     stripe: !!process.env.STRIPE_SECRET_KEY,
+    stripe_webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+    stripe_prices:
+      !!process.env.STRIPE_PRICE_STARTER && !!process.env.STRIPE_PRICE_PRO,
+    resend: !!process.env.RESEND_API_KEY,
     line: !!process.env.LINE_WEBHOOK_URL,
     openai: !!process.env.OPENAI_API_KEY,
     site_url: !!process.env.NEXT_PUBLIC_SITE_URL,
+    operator_business_name: !!process.env.NEXT_PUBLIC_LEGAL_BUSINESS_NAME,
+    operator_support_email: !!process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
   };
 
   let supabaseReachable = false;

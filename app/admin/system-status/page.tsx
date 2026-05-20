@@ -25,9 +25,12 @@ export default async function SystemStatusPage() {
     stripeStarter: !!process.env.STRIPE_PRICE_STARTER,
     stripePro: !!process.env.STRIPE_PRICE_PRO,
     stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+    resend: !!process.env.RESEND_API_KEY,
     openai: !!process.env.OPENAI_API_KEY,
     line: !!process.env.LINE_WEBHOOK_URL,
     serviceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    operatorBiz: !!process.env.NEXT_PUBLIC_LEGAL_BUSINESS_NAME,
+    operatorSupportEmail: !!process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
   };
 
   // Probe Supabase tables to detect missing migrations.
@@ -100,8 +103,27 @@ export default async function SystemStatusPage() {
       label: "Stripe Webhook (STRIPE_WEBHOOK_SECRET)",
       ok: env.stripeWebhook ? true : "warn",
       detail: env.stripeWebhook
-        ? "✅ 設定済み"
-        : "未設定: Webhook 署名検証はスキップされます。",
+        ? "✅ 設定済み — 署名検証が有効です。"
+        : "未設定: Webhook 署名検証はスキップされます。本番運用前に設定してください。",
+    },
+    {
+      label: "メール送信 (RESEND_API_KEY)",
+      ok: env.resend ? true : "warn",
+      detail: env.resend
+        ? "✅ 招待・予約確認・問い合わせ自動応答が Resend で送信されます。"
+        : "未設定: メールは notification_logs に skipped として残ります。",
+    },
+    {
+      label: "運営者情報 (販売事業者 / サポートメール)",
+      ok: env.operatorBiz && env.operatorSupportEmail
+        ? true
+        : env.operatorBiz || env.operatorSupportEmail
+          ? "warn"
+          : "warn",
+      detail:
+        env.operatorBiz && env.operatorSupportEmail
+          ? "✅ /commercial-disclosure に反映されています。"
+          : "未設定: /commercial-disclosure は『請求があった場合に遅滞なく開示します』と表示されます。一般販売前に設定してください。",
     },
     {
       label: "OpenAI (OPENAI_API_KEY)",

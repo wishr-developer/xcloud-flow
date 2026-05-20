@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import {
   Card,
   CardContent,
@@ -14,12 +14,30 @@ import { formatCurrency, formatTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+interface BookingRow {
+  id: string;
+  customer_name: string;
+  customer_email: string;
+  payment_status: string;
+  payment_method: string;
+  total_price: number | null;
+  qr_token: string | null;
+  slot: {
+    date?: string;
+    start_time?: string;
+    end_time?: string;
+    lesson?: { title?: string };
+    teacher?: { name?: string };
+  } | null;
+}
+
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: { booking?: string };
+  searchParams: { booking?: string; t?: string };
 }) {
   const bookingId = searchParams.booking;
+  const token = searchParams.t ?? null;
   if (!bookingId) {
     return (
       <Card>
@@ -30,14 +48,41 @@ export default async function SuccessPage({
     );
   }
 
-  const supabase = createClient();
-  const { data: booking } = await supabase
-    .from("bookings")
-    .select(
-      "id, customer_name, customer_email, payment_status, payment_method, total_price, qr_token, slot:slot_id(date,start_time,end_time,lesson:lesson_id(title), teacher:teacher_id(name))"
-    )
-    .eq("id", bookingId)
-    .maybeSingle();
+  // Try the authed/anon client first — works for users with auth context
+  // or whenever RLS allows the read. If that returns null and we have a
+  // token in the URL, fall back to the service-role client and verify
+  // the token matches the row before exposing details.
+  const SELECT =
+    "id, customer_name, customer_email, payment_status, payment_method, total_price, qr_token, slot:slot_id(date,start_time,end_time,lesson:lesson_id(title), teacher:teacher_id(name))";
+  let booking: BookingRow | null = null;
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("bookings")
+      .select(SELECT)
+      .eq("id", bookingId)
+      .maybeSingle();
+    booking = (data as BookingRow | null) ?? null;
+  } catch {
+    booking = null;
+  }
+
+  if (!booking && token) {
+    const svc = createServiceClient();
+    if (svc) {
+      try {
+        const { data } = await svc
+          .from("bookings")
+          .select(SELECT)
+          .eq("id", bookingId)
+          .eq("qr_token", token)
+          .maybeSingle();
+        booking = (data as BookingRow | null) ?? null;
+      } catch {
+        booking = null;
+      }
+    }
+  }
 
   if (!booking) {
     return (
@@ -49,15 +94,7 @@ export default async function SuccessPage({
     );
   }
 
-  const slot = booking.slot as
-    | {
-        date?: string;
-        start_time?: string;
-        end_time?: string;
-        lesson?: { title?: string };
-        teacher?: { name?: string };
-      }
-    | null;
+  const slot = booking.slot;
 
   return (
     <div className="mx-auto max-w-xl">
