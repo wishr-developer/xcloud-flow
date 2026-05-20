@@ -65,7 +65,7 @@ const FEATURES = [
   {
     icon: CreditCard,
     title: "決済 (Stripe / 現地)",
-    desc: "クレジット・現地支払い・デモ決済の3モード。クーポンも標準装備。",
+    desc: "クレジットカードと現地支払いに対応。クーポンも標準装備で、配布から利用統計まで一元管理。",
   },
   {
     icon: Bell,
@@ -175,7 +175,7 @@ export default async function HomePage() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/book/chat">AIチャットで予約デモ</Link>
+                <Link href="/book/chat">AIチャットで予約を試す</Link>
               </Button>
             </div>
             <dl className="mt-10 grid max-w-md grid-cols-4 gap-4">
@@ -400,7 +400,7 @@ export default async function HomePage() {
                 今日からはじめる、スクール運営のDX。
               </h2>
               <p className="mt-3 text-sm text-white/80">
-                無料登録ですぐにご利用いただけます。Stripe・LINE・OpenAIは任意設定で、未設定でも全機能のお試しが可能です。
+                無料プランから始められ、必要なときに有料プランへ移行できます。Stripe・LINE・AI連携は任意で有効化できます。
               </p>
               <ul className="mt-4 space-y-2 text-sm text-white/80">
                 <li className="flex items-center gap-2">

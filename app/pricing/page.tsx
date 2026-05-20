@@ -101,19 +101,39 @@ export default function PricingPage() {
 
         <div className="mt-10 rounded-xl border bg-slate-50 p-6 text-sm text-slate-700">
           <h3 className="mb-2 font-semibold text-slate-900">
-            プランに関するご注意
+            プランに関するご案内
           </h3>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Stripe が未設定の環境では、ボタンを押すとデモ決済として動作します（実際の請求は発生しません）。
+              料金はすべて税込価格です。請求はクレジットカードでの月次請求となります。
             </li>
             <li>
               プラン変更はいつでも管理画面の「サブスクリプション」から行えます。
             </li>
             <li>
-              Enterpriseプランはお問い合わせフォームより個別にご相談ください。
+              現在オンライン決済の準備中の場合がございます。お申し込みは
+              <Link href="/contact" className="text-primary underline">
+                お問い合わせフォーム
+              </Link>
+              からご連絡ください。
+            </li>
+            <li>
+              Enterprise プランは
+              <Link href="/contact?plan=enterprise" className="text-primary underline">
+                お問い合わせ
+              </Link>
+              より個別にご相談ください。
             </li>
           </ul>
+          <p className="mt-4 text-xs text-slate-500">
+            お申し込み前に
+            <Link href="/terms" className="underline">利用規約</Link>
+            ・
+            <Link href="/privacy" className="underline">プライバシーポリシー</Link>
+            ・
+            <Link href="/commercial-disclosure" className="underline">特定商取引法に基づく表記</Link>
+            をご確認ください。
+          </p>
         </div>
       </section>
       <SiteFooter />

@@ -30,9 +30,23 @@ Next.js (App Router) + TypeScript + Tailwind + Supabase (Auth/DB/RLS) で構築�
 管理画面の「サイト設定」で切替可能。AIチャットの文言や呼称が自動で変わります。
 
 ### 決済 / 通知
-- **Stripe Checkout** (未設定なら自動でデモ決済)
-- **LINE Webhook 通知** (未設定なら "skipped" ログ)
+- **Stripe Checkout / Customer Portal** に対応 (本番設定手順は下記参照)
+- **LINE Webhook 通知** で予約・キャンセル・リマインドを自動送信
 - **クーポン** (パーセント / 固定額、利用上限・有効期限対応)
+
+### Stripe 本番設定 (オーナー作業)
+
+1. Stripe ダッシュボード本番モードで Starter / Pro プランの Price を作成
+2. Vercel の Environment Variables に以下を設定:
+   - `STRIPE_SECRET_KEY` (本番シークレット)
+   - `STRIPE_PRICE_STARTER` / `STRIPE_PRICE_PRO`
+   - `STRIPE_WEBHOOK_SECRET`
+3. Stripe Webhook エンドポイントを追加:
+   - URL: `https://xcloud-flow.vercel.app/api/stripe/webhook`
+   - Events: `checkout.session.completed`, `customer.subscription.{created,updated,deleted}`
+4. Stripe Customer Portal を有効化 (Settings → Billing → Customer Portal)
+
+> Stripe を有効化するまでは、`/pricing` の Starter / Pro CTA から `/admin/subscription` にて「現在オンライン決済の準備中です。お問い合わせください。」と自然な案内を表示します。本番設定後は自動で Stripe Checkout に切り替わります。
 
 ---
 

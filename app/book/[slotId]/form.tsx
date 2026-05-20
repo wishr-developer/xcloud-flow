@@ -96,12 +96,11 @@ export function BookingForm({
       </div>
       <div className="space-y-2">
         <Label>支払い方法</Label>
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-2 gap-2 text-xs">
           {(
             [
               { id: "onsite", label: "現地払い" },
               { id: "stripe", label: "カード決済" },
-              { id: "demo", label: "デモ決済" },
             ] as { id: PaymentMethod; label: string }[]
           ).map((opt) => (
             <button
@@ -119,7 +118,7 @@ export function BookingForm({
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Stripe未設定でも「カード決済」を選ぶとデモ決済で完了します。
+          カード決済は Stripe を通じて安全に処理されます。
         </p>
       </div>
 

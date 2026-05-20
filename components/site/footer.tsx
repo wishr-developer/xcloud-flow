@@ -3,19 +3,20 @@ import { Logo } from "./logo";
 
 const COLS = [
   {
-    heading: "学ぶ",
+    heading: "サービス",
     links: [
       { href: "/courses", label: "オンライン講座" },
       { href: "/book", label: "予約 (対面/オンライン)" },
-      { href: "/book/chat", label: "AIチャット予約" },
+      { href: "/book/chat", label: "AI チャット予約" },
+      { href: "/pricing", label: "料金プラン" },
     ],
   },
   {
-    heading: "プラン / サポート",
+    heading: "サポート",
     links: [
-      { href: "/pricing", label: "料金プラン" },
-      { href: "/announcements", label: "お知らせ" },
+      { href: "/support", label: "サポート" },
       { href: "/faq", label: "よくある質問" },
+      { href: "/announcements", label: "お知らせ" },
       { href: "/contact", label: "お問い合わせ" },
     ],
   },
@@ -23,8 +24,17 @@ const COLS = [
     heading: "アカウント",
     links: [
       { href: "/login", label: "ログイン" },
-      { href: "/signup", label: "無料登録" },
+      { href: "/signup", label: "無料ではじめる" },
       { href: "/my", label: "マイページ" },
+    ],
+  },
+  {
+    heading: "法務",
+    links: [
+      { href: "/terms", label: "利用規約" },
+      { href: "/privacy", label: "プライバシーポリシー" },
+      { href: "/commercial-disclosure", label: "特定商取引法に基づく表記" },
+      { href: "/security", label: "セキュリティ" },
     ],
   },
 ];
@@ -32,11 +42,11 @@ const COLS = [
 export function SiteFooter() {
   return (
     <footer className="mt-20 border-t bg-slate-50">
-      <div className="container grid gap-8 py-12 md:grid-cols-4">
+      <div className="container grid gap-8 py-12 md:grid-cols-5">
         <div>
           <Logo />
           <p className="mt-3 text-sm text-muted-foreground">
-            オンライン学習・予約・決済・顧客管理をひとつに統合したラーニング/業務プラットフォーム。
+            あらゆるスクール業態のための、予約・受講・決済・通知・顧客管理を統合したクラウド運営プラットフォーム。
           </p>
         </div>
         {COLS.map((c) => (

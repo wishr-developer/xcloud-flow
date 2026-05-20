@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const FEATURES = [
   { icon: Calendar, title: "予約・出席管理", desc: "対面/オンライン/ハイブリッド対応" },
   { icon: MessageSquare, title: "AIチャット予約", desc: "業種に応じた会話導線" },
-  { icon: CreditCard, title: "Stripe決済 / 月謝", desc: "未設定でもデモ決済で稼働" },
+  { icon: CreditCard, title: "Stripe決済 / 月謝", desc: "オンラインカード決済と月謝徴収に対応" },
   { icon: Users, title: "顧客 (CRM)", desc: "会員プロファイル・履歴管理" },
 ];
 
@@ -120,7 +120,7 @@ export default function IndustryLandingPage({ params }: PageProps) {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/book/chat">AIチャット予約デモ</Link>
+              <Link href="/book/chat">AIチャット予約を試す</Link>
             </Button>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function IndustryLandingPage({ params }: PageProps) {
         <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-900 px-8 py-12 text-white shadow-xl">
           <h2 className="text-2xl font-bold">今日から{t.displayName}運営をDX。</h2>
           <p className="mt-2 text-sm text-white/80">
-            無料登録ですぐに業種テンプレートが適用されます。Stripe / LINE / OpenAI は未設定でも全機能をお試しいただけます。
+            無料プランから始められ、業種テンプレートをワンクリックで適用できます。Stripe / LINE / AI連携は必要に応じて有効化してください。
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Button asChild size="lg" variant="secondary">

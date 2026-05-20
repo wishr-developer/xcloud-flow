@@ -103,12 +103,11 @@ export function EnrollButton({
       {price > 0 && (
         <div className="space-y-1.5">
           <Label>支払い方法</Label>
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             {(
               [
                 { id: "stripe", label: "カード" },
                 { id: "onsite", label: "請求書" },
-                { id: "demo", label: "デモ" },
               ] as { id: Method; label: string }[]
             ).map((opt) => (
               <button

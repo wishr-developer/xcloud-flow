@@ -318,12 +318,11 @@ export function ChatBooking({
                 </div>
                 <div className="space-y-1.5">
                   <Label>支払い方法</Label>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     {(
                       [
                         { id: "onsite", label: "現地払い" },
                         { id: "stripe", label: "カード決済" },
-                        { id: "demo", label: "デモ決済" },
                       ] as const
                     ).map((opt) => (
                       <button

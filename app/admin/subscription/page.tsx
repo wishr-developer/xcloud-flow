@@ -72,13 +72,14 @@ export default async function AdminSubscriptionPage({ searchParams }: PageProps)
 
   const banner = searchParams?.demo === "1" ? (
     <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      Stripe が未設定または対象プラン未設定のため、{currentPlan.name} プランをデモモードで適用しました。
-      本番運用時は <code>STRIPE_SECRET_KEY</code> と{" "}
-      <code>STRIPE_PRICE_*</code> を Vercel に設定してください。
+      <strong>{currentPlan.name} プランのお申し込みを受け付けました。</strong>{" "}
+      現在オンライン決済の準備中です。担当よりサポートからご連絡いたしますので、
+      お急ぎの場合は <Link href="/contact" className="underline">お問い合わせ</Link>{" "}
+      よりご連絡ください。
     </div>
   ) : searchParams?.status === "success" ? (
     <div className="rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-      Stripe決済が完了しました。プランを更新しました。
+      ご決済が完了しました。プランを更新しました。
     </div>
   ) : null;
 
@@ -115,7 +116,7 @@ export default async function AdminSubscriptionPage({ searchParams }: PageProps)
             <div>次回更新: {new Date(currentPeriodEnd).toLocaleString("ja-JP")}</div>
           )}
           <div className="text-xs text-muted-foreground">
-            Stripe接続: {stripeConfigured ? "✅ 本番モード" : "未設定 (デモ動作)"}
+            オンライン決済: {stripeConfigured ? "✅ 接続済み" : "準備中"}
           </div>
           <form action="/api/stripe/portal" method="post" className="pt-2">
             <Button type="submit" size="sm" variant="outline">

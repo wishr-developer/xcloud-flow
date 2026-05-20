@@ -15,6 +15,11 @@ const STATIC_PATHS = [
   "/announcements",
   "/login",
   "/signup",
+  "/support",
+  "/security",
+  "/terms",
+  "/privacy",
+  "/commercial-disclosure",
 ];
 
 const INDUSTRY_SLUGS = [
