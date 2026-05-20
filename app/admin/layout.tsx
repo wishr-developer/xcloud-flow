@@ -23,29 +23,34 @@ export default async function AdminLayout({
     redirect("/login?next=/admin");
   }
 
-  // Resolve profile + org for guard / banners.
-  let role: string | null = null;
-  let orgId: string | null = null;
-  let onboarded: boolean | null = null;
-  let plan: string = "free";
-  try {
-    const { data: profile } = await supabase
+  // Fetch profile + unread count in parallel (the org row depends on profile.organization_id).
+  const [profileRes, unreadRes] = await Promise.all([
+    supabase
       .from("profiles")
       .select("role, organization_id")
       .eq("id", user.id)
-      .maybeSingle();
-    role = (profile as { role?: string | null } | null)?.role ?? null;
-    orgId = (profile as { organization_id?: string | null } | null)
+      .maybeSingle(),
+    supabase
+      .from("in_app_notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .is("read_at", null),
+  ]);
+
+  const role: string | null =
+    (profileRes.data as { role?: string | null } | null)?.role ?? null;
+  const orgId: string | null =
+    (profileRes.data as { organization_id?: string | null } | null)
       ?.organization_id ?? null;
-  } catch {
-    role = null;
-  }
+  const unreadCount: number = unreadRes.count ?? 0;
 
   if (role && !ADMIN_ROLES.has(role)) {
     // Customers / students don't belong in /admin
     redirect("/my");
   }
 
+  let onboarded: boolean | null = null;
+  let plan: string = "free";
   if (orgId) {
     try {
       const { data: org } = await supabase
@@ -60,18 +65,6 @@ export default async function AdminLayout({
     } catch {
       // ignore
     }
-  }
-
-  let unreadCount = 0;
-  try {
-    const { count } = await supabase
-      .from("in_app_notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .is("read_at", null);
-    unreadCount = count ?? 0;
-  } catch {
-    unreadCount = 0;
   }
 
   return (

@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContactForm } from "./form";
 import { Mail, MessageCircle, Phone } from "lucide-react";
 
+export const dynamic = "force-static";
 export const metadata = { title: "お問い合わせ" };
 
 export default function ContactPage() {
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <div className="container max-w-4xl py-10">
         <h1 className="text-3xl font-bold tracking-tight">お問い合わせ</h1>
         <p className="mt-1 text-sm text-muted-foreground">

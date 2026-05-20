@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
 
 export default async function AnnouncementDetail({
   params,
@@ -23,7 +23,7 @@ export default async function AnnouncementDetail({
   if (!a) notFound();
 
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <article className="container max-w-3xl py-10">
         <div className="text-xs text-muted-foreground">
           {formatDate(a.published_at)}

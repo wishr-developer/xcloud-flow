@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { BottomNav } from "@/components/site/bottom-nav";
-import { InstallPrompt } from "@/components/site/install-prompt";
+import { DeferredInstallPrompt } from "@/components/site/deferred-install-prompt";
 import { ToastProvider, ToastBridge } from "@/components/ui/toast";
 
 const SITE_URL =
@@ -50,7 +50,7 @@ export default function RootLayout({
           <ToastBridge />
           {children}
           <BottomNav />
-          <InstallPrompt />
+          <DeferredInstallPrompt />
         </ToastProvider>
       </body>
     </html>

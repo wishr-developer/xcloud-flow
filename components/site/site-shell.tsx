@@ -2,20 +2,29 @@ import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
 
-export async function SiteShell({
-  children,
-}: {
+interface SiteShellProps {
   children: React.ReactNode;
-}) {
-  const supabase = createClient();
+  /**
+   * Skip the Supabase auth lookup. Required for pages that want to be
+   * statically generated / ISR cached. Authed users still see "ログイン /
+   * 無料登録" in the desktop header, but the BottomNav still routes them to
+   * /my and /admin, so the trade-off is purely cosmetic.
+   */
+  skipAuth?: boolean;
+}
+
+export async function SiteShell({ children, skipAuth = false }: SiteShellProps) {
   let isAuthed = false;
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isAuthed = !!user;
-  } catch {
-    isAuthed = false;
+  if (!skipAuth) {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      isAuthed = !!user;
+    } catch {
+      isAuthed = false;
+    }
   }
   return (
     <div className="flex min-h-screen flex-col">

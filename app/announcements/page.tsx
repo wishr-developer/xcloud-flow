@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { Pin } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
 
 export const metadata = { title: "お知らせ" };
 
@@ -25,7 +25,7 @@ export default async function AnnouncementsPage() {
     .order("published_at", { ascending: false });
 
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <div className="container py-10">
         <h1 className="text-3xl font-bold tracking-tight">お知らせ</h1>
         <p className="mt-1 text-sm text-muted-foreground">

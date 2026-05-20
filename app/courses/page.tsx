@@ -51,7 +51,7 @@ export default async function CoursesPage({
   ) as string[];
 
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <div className="container py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">講座を探す</h1>

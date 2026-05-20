@@ -14,7 +14,7 @@ import { CheckCircle2, Clock, PlayCircle, Star, User } from "lucide-react";
 import Link from "next/link";
 import { EnrollButton } from "./enroll-button";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
 
 const LEVEL: Record<string, string> = {
   beginner: "初級",
@@ -80,7 +80,7 @@ export default async function CourseDetailPage({
   );
 
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <div className="container py-10">
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">

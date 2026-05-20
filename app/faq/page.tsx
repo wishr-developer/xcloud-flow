@@ -2,14 +2,15 @@ import { SiteShell } from "@/components/site/site-shell";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const dynamic = "force-dynamic";
+// ISR: FAQs rarely change.
+export const revalidate = 600;
 export const metadata = { title: "FAQ" };
 
 export default async function FaqPage() {
   const supabase = createClient();
   const { data: faqs } = await supabase
     .from("faqs")
-    .select("*")
+    .select("id,category,question,answer,order_index")
     .eq("published", true)
     .order("category", { ascending: true })
     .order("order_index", { ascending: true });
@@ -21,7 +22,7 @@ export default async function FaqPage() {
   });
 
   return (
-    <SiteShell>
+    <SiteShell skipAuth>
       <div className="container max-w-3xl py-10">
         <h1 className="text-3xl font-bold tracking-tight">よくある質問</h1>
         <p className="mt-1 text-sm text-muted-foreground">

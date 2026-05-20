@@ -5,26 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PLANS } from "@/lib/plans";
-import { createClient } from "@/lib/supabase/server";
 import { CheckCircle2, Sparkles, Crown } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+// Pure marketing page — no DB / cookies needed.
+export const dynamic = "force-static";
 
-export default async function PricingPage() {
-  const supabase = createClient();
-  let isAuthed = false;
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isAuthed = !!user;
-  } catch {
-    isAuthed = false;
-  }
-
+export default function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader isAuthed={isAuthed} />
+      <SiteHeader />
       <section className="border-b bg-gradient-to-b from-sky-50 via-white to-white">
         <div className="container py-16 text-center">
           <Badge variant="secondary" className="mb-3">
