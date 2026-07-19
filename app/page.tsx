@@ -310,7 +310,11 @@ export default async function HomePage() {
                             </span>
                           )}
                         </div>
-                        <Badge variant="outline">{c.lesson_count}本</Badge>
+                        {c.lesson_count > 0 ? (
+                          <Badge variant="outline">{c.lesson_count}本</Badge>
+                        ) : (
+                          <Badge variant="secondary">準備中</Badge>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -427,7 +431,7 @@ export default async function HomePage() {
                 variant="outline"
                 className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
-                <Link href="/contact">事業者へのお問合せ</Link>
+                <Link href="/contact">事業者へのお問い合わせ</Link>
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Download, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,9 +9,20 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Show install prompt only after the visitor is engaged (past LP hero),
+// so the modal-like dialog does not steal focus from the primary
+// "無料ではじめる" CTA on first visit. Also persist dismissal to avoid
+// re-firing on every navigation.
+const ENGAGED_ROUTES = ["/courses", "/pricing", "/my", "/book", "/faq"];
+const ENGAGE_DELAY_MS = 30_000;
+const DISMISS_KEY = "xcf.installPrompt.dismissedAt";
+const DISMISS_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 export function InstallPrompt() {
+  const pathname = usePathname();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [engaged, setEngaged] = useState(false);
 
   useEffect(() => {
     function onPrompt(e: Event) {
@@ -25,7 +37,42 @@ export function InstallPrompt() {
       );
   }, []);
 
-  if (!deferred || dismissed) return null;
+  // Rehydrate dismissal from localStorage (7-day TTL).
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(DISMISS_KEY);
+      if (raw) {
+        const at = Number(raw);
+        if (Number.isFinite(at) && Date.now() - at < DISMISS_TTL_MS) {
+          setDismissed(true);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Gate: only show once the visitor has left the LP hero
+  // (either navigated to an engaged route, or spent enough time on site).
+  useEffect(() => {
+    if (pathname && ENGAGED_ROUTES.some((r) => pathname.startsWith(r))) {
+      setEngaged(true);
+      return;
+    }
+    const t = window.setTimeout(() => setEngaged(true), ENGAGE_DELAY_MS);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
+
+  function persistDismiss() {
+    try {
+      window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    } catch {
+      /* ignore */
+    }
+    setDismissed(true);
+  }
+
+  if (!deferred || dismissed || !engaged) return null;
 
   return (
     <div
@@ -57,7 +104,7 @@ export function InstallPrompt() {
               インストール
             </button>
             <button
-              onClick={() => setDismissed(true)}
+              onClick={persistDismiss}
               className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:bg-slate-100"
             >
               あとで

@@ -68,7 +68,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="container flex flex-col items-start justify-between gap-2 py-4 text-xs text-muted-foreground md:flex-row md:items-center">
-          <span>© {new Date().getFullYear()} XCloud-Flow. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} XCloud Flow. All rights reserved.</span>
           <span>Made with Next.js · Supabase · Vercel</span>
         </div>
       </div>

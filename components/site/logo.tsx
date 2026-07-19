@@ -34,7 +34,7 @@ export function Logo({
         </svg>
       </span>
       <span className={cn("font-semibold tracking-tight", text)}>
-        XCloud-Flow
+        XCloud Flow
       </span>
     </span>
   );
