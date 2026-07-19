@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "XCloud-Flow — Scheduling SaaS",
-    short_name: "XCloud-Flow",
+    name: "XCloud Flow — School Operations SaaS",
+    short_name: "XCloud Flow",
     description:
       "予約 × 受講 × 決済 × 通知 × AI を統合したスクール運営SaaS",
     start_url: "/",
