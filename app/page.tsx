@@ -406,6 +406,9 @@ export default async function HomePage() {
               <p className="mt-3 text-sm text-white/80">
                 無料プランから始められ、必要なときに有料プランへ移行できます。Stripe・LINE・AI連携は任意で有効化できます。
               </p>
+              <p className="mt-3 text-sm text-white/90">
+                料金: Free ¥0 · Starter ¥4,980/月 · Pro ¥19,800/月 · Enterprise (要相談) — <Link href="/pricing" className="underline underline-offset-2 hover:text-white">詳細を見る →</Link>
+              </p>
               <ul className="mt-4 space-y-2 text-sm text-white/80">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-300" />

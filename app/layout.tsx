@@ -5,7 +5,7 @@ import { DeferredInstallPrompt } from "@/components/site/deferred-install-prompt
 import { ToastProvider, ToastBridge } from "@/components/ui/toast";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://xcloud-flow.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://flow.xiora-official.com";
 
 export const metadata: Metadata = {
   title: {
@@ -52,6 +52,13 @@ export default function RootLayout({
           <BottomNav />
           <DeferredInstallPrompt />
         </ToastProvider>
+        {/* Xiora 24/7 Customer Chat (Phase G) */}
+        <script
+          async
+          src="https://chat.xiora-official.com/widget.js"
+          data-site="xcloud-flow"
+          data-agent-name="XCloud Flow Assistant"
+        />
       </body>
     </html>
   );
